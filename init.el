@@ -10,6 +10,7 @@
 ;; Set up the visible bell
 (setq visible-bell t)
 
+
 (set-face-attribute 'default nil :font "Fira Code Retina" :height 120)
 
 ;; Set the fixed pitch face
@@ -52,9 +53,6 @@
 
 
 
-
-
-
 (use-package ligature
   :config
   (ligature-set-ligatures 't '("www"))
@@ -72,8 +70,6 @@
  (global-ligature-mode 't))
 
 
-
-
 (use-package ivy
   :diminish
   :config
@@ -85,7 +81,7 @@
   :custom ((doom-modeline-height 20)))
 
 (use-package doom-themes
-  :init (load-theme 'doom-palenight t))
+  :init (load-theme 'doom-horizon t))
 
 (use-package all-the-icons)
 
@@ -141,6 +137,9 @@
 
 (use-package magit)
 
+
+
+
 ;; Org Mode Configuration ------------------------------------------------------
 
 (defun azd/org-mode-setup ()
@@ -181,7 +180,8 @@
   (azd/org-font-setup))
 
   (setq org-agenda-files
-	'("~/org/tasks.org"))
+	'("~/org/tasks.org"
+	  "~/org/birthdays.org"))
 
 (use-package org-bullets
   :after org
@@ -196,4 +196,46 @@
 
 (use-package visual-fill-column
   :hook (org-mode . azd/org-mode-visual-fill))
- 
+
+
+(require 'org-tempo)
+
+(add-to-list 'org-structure-template-alist '("sh" . "src shell"))
+(add-to-list 'org-structure-template-alist '("el" . "src emacs-lisp"))
+
+
+;; LSP
+(defun azd/lsp-mode-setup ()
+  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+  (lsp-headerline-breadcrumb-mode))
+
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :hook (lsp-mode . azd/lsp-mode-setup)
+  :init
+  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+  :config
+  (lsp-enable-which-key-integration t))
+
+
+
+;; Clojure LSP
+(use-package cider)
+
+(setq package-selected-packages '(clojure-mode lsp-mode cider lsp-treemacs flycheck company))
+
+(when (cl-find-if-not #'package-installed-p package-selected-packages)
+  (package-refresh-contents)
+  (mapc #'package-install package-selected-packages))
+
+(add-hook 'clojure-mode-hook 'lsp)
+(add-hook 'clojurescript-mode-hook 'lsp)
+(add-hook 'clojurec-mode-hook 'lsp)
+
+(setq gc-cons-threshold (* 100 1024 1024)
+      read-process-output-max (* 1024 1024)
+      treemacs-space-between-root-nodes nil
+      company-minimum-prefix-length 1
+      ; lsp-enable-indentation nil ; uncomment to use cider indentation instead of lsp
+      ; lsp-enable-completion-at-point nil ; uncomment to use cider completion instead of lsp
+      )
