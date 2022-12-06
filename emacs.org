@@ -1,0 +1,61 @@
+#+title Emacs config
+#+PROPERTY: header-args:emacs-lisp :tangle ./init-new.el
+
+* Org Mode
+** Auto-tangle
+#+begin_src emacs-lisp
+(defun azd/org-babel-tangle-config ()
+  (when (string-equal (buffer-file-name)
+                      (expand-file-name "~/.emacs.d/emacs.org"))
+    ;; Dynamic scoping to the rescue
+    (let ((org-confirm-babel-evaluate nil))
+      (org-babel-tangle))))
+
+(add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'azd/org-babel-tangle-config)))
+
+#+end_src
+
+
+* LSP
+** Setup
+#+begin_src emacs-lisp
+(defun azd/lsp-mode-setup ()
+  (setq lsp-headerline-breadcrumb-segments '(path-up-to-project file symbols))
+  (lsp-headerline-breadcrumb-mode))
+
+(use-package lsp-mode
+  :commands (lsp lsp-deferred)
+  :hook (lsp-mode . azd/lsp-mode-setup)
+  :init
+  (setq lsp-keymap-prefix "C-c l")  ;; Or 'C-l', 's-l'
+  :config
+  (lsp-enable-which-key-integration t))
+#+end_src
+
+
+** Clojure
+#+begin_src emacs-lisp
+
+(use-package cider)
+
+(setq package-selected-packages '(clojure-mode lsp-mode cider lsp-treemacs flycheck company))
+
+(when (cl-find-if-not #'package-installed-p package-selected-packages)
+  (package-refresh-contents)
+  (mapc #'package-install package-selected-packages))
+
+(add-hook 'clojure-mode-hook 'lsp)
+(add-hook 'clojurescript-mode-hook 'lsp)
+(add-hook 'clojurec-mode-hook 'lsp)
+
+(setq gc-cons-threshold (* 100 1024 1024)
+      read-process-output-max (* 1024 1024)
+      treemacs-space-between-root-nodes nil
+      company-minimum-prefix-length 1
+      ; lsp-enable-indentation nil ; uncomment to use cider indentation instead of lsp
+      ; lsp-enable-completion-at-point nil ; uncomment to use cider completion instead of lsp
+      )
+#+end_src
+
+
+

@@ -14,10 +14,10 @@
 (set-face-attribute 'default nil :font "Fira Code Retina" :height 120)
 
 ;; Set the fixed pitch face
-(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height 150)
+(set-face-attribute 'fixed-pitch nil :font "Fira Code Retina" :height 125)
 
 ;; Set the variable pitch face
-(set-face-attribute 'variable-pitch nil :font "Cantarell" :height 150 :weight 'regular)
+(set-face-attribute 'variable-pitch nil :font "Cantarell" :height 140 :weight 'regular)
  
 
 ;; Make ESC quit prompts
@@ -81,7 +81,7 @@
   :custom ((doom-modeline-height 20)))
 
 (use-package doom-themes
-  :init (load-theme 'doom-horizon t))
+  :init (load-theme 'tsdh-light t))
 
 (use-package all-the-icons)
 
@@ -239,3 +239,14 @@
       ; lsp-enable-indentation nil ; uncomment to use cider indentation instead of lsp
       ; lsp-enable-completion-at-point nil ; uncomment to use cider completion instead of lsp
       )
+
+
+(defun azd/org-babel-tangle-config ()
+  (when (string-equal (buffer-file-name)
+                      (expand-file-name "~/.emacs.d/emacs.org"))
+    ;; Dynamic scoping to the rescue
+    (let ((org-confirm-babel-evaluate nil))
+      (org-babel-tangle))))
+
+(add-hook 'org-mode-hook (lambda () (add-hook 'after-save-hook #'azd/org-babel-tangle-config)))
+
